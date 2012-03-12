@@ -7,13 +7,44 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = self.class.list_ratings
+    #@all_ratings = ['G', 'PG', 'PG-13', 'R']
+    
+    if (!defined? ratings)
+      ratings = session[:ratings]
+    end
+    
+    #if ratings is not define, set it to all_ratings
+    if ( params[:ratings])
+      rating_keys =  params[:ratings].keys
+      session[:ratings] = params[:ratings]
+      
+    else
+      if session[:ratings]
+        rating_keys = session[:ratings].keys
+      else
+        rating_keys = @all_ratings  
+      end
+      
+    end
     
     if (params.has_key?(:title_header))
-      @movies = Movie.find(:all, :order => :title)
+      session[:title_header] = true
+      session.delete :release_date_header
+      
+      @movies = Movie.find(:all, :conditions => { :rating => rating_keys} ,:order => :title)
     elsif (params.has_key?(:release_date_header))
-      @movies = Movie.find(:all, :order => :release_date)
+      session[:release_date_header] = true
+      session.delete :title_header
+      @movies = Movie.find(:all, :conditions => { :rating => rating_keys}, :order => :release_date)
     else
-      @movies = Movie.all
+      if (session[:title_header])
+        @movies = Movie.find(:all, :conditions => { :rating => rating_keys} ,:order => :title)
+      elsif  (session[:release_date_header])
+        @movies = Movie.find(:all, :conditions => { :rating => rating_keys} ,:order => :release_date)
+      else
+        @movies = Movie.find(:all, :conditions => { :rating => rating_keys})
+      end
     end
   end
 
@@ -43,6 +74,25 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+  
+  def self.list_ratings
+    # http://guides.rubyonrails.org/active_record_querying.html#selecting-specific-fields
+    #@unique_rating_set = Movie.select(:rating).uniq
+    movies = Movie.all
+    
+    existing_rating_hash = Hash.new
+    
+    rating_value_collection = []
+    movies.each do |movie|
+      if (! existing_rating_hash.has_key?(movie.rating))
+        existing_rating_hash[movie.rating] = true
+        rating_value_collection = rating_value_collection + [movie.rating]
+      end
+    end
+    
+    return rating_value_collection
+    
   end
 
 end
