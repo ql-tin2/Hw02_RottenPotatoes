@@ -19,6 +19,12 @@ Existing Git Repo?
   cd existing_git_repo
   git remote add origin git@github.com:ql-tin2/Hw02_RottenPotatoes.git
   git push -u origin master
+
+I used
+git remote add hw02rottenpotatoes git@github.com:ql-tin2/Hw02_RottenPotatoes.git
+to push up
+git push -u hw02rottenpotatoes master
+
       
 
 == Welcome to Rails
