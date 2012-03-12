@@ -10,9 +10,7 @@ class MoviesController < ApplicationController
     @all_ratings = self.class.list_ratings
     #@all_ratings = ['G', 'PG', 'PG-13', 'R']
     
-    if (!defined? ratings)
-      ratings = session[:ratings]
-    end
+    
     
     #if ratings is not define, set it to all_ratings
     if ( params[:ratings])
