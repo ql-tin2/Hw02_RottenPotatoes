@@ -10,16 +10,21 @@ class MoviesController < ApplicationController
     @all_ratings = self.class.list_ratings
     #@all_ratings = ['G', 'PG', 'PG-13', 'R']
     
-    
+    ratings = Hash.new
+    @all_ratings.each do |rating_value|
+      ratings[rating_value] = 1
+    end
     
     #if ratings is not define, set it to all_ratings
     if ( params[:ratings])
       rating_keys =  params[:ratings].keys
       session[:ratings] = params[:ratings]
+      ratings = session[:ratings]
       
     else
       if session[:ratings]
         rating_keys = session[:ratings].keys
+        ratings = session[:ratings]
       else
         rating_keys = @all_ratings  
       end
@@ -37,9 +42,11 @@ class MoviesController < ApplicationController
       @movies = Movie.find(:all, :conditions => { :rating => rating_keys}, :order => :release_date)
     else
       if (session[:title_header])
-        @movies = Movie.find(:all, :conditions => { :rating => rating_keys} ,:order => :title)
+        redirect_to movies_path ({ :title_header => true , :ratings => ratings } )
+        #@movies = Movie.find(:all, :conditions => { :rating => rating_keys} ,:order => :title)
       elsif  (session[:release_date_header])
-        @movies = Movie.find(:all, :conditions => { :rating => rating_keys} ,:order => :release_date)
+        redirect_to movies_path ({ :release_date_header => true , :ratings => ratings })
+        #@movies = Movie.find(:all, :conditions => { :rating => rating_keys} ,:order => :release_date)
       else
         @movies = Movie.find(:all, :conditions => { :rating => rating_keys})
       end
